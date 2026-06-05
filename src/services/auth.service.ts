@@ -26,9 +26,9 @@ export class AuthService {
     const user = await UserModel.create({
       email: input.email.toLowerCase(),
       fullname: input.fullname,
-      walletId: privy.wallet.id,
-      walletAddress: privy.wallet.address,
-      userId: privy.user.id,
+      walletId: privy?.wallet.id,
+      walletAddress: privy?.wallet.address,
+      userId: privy?.user.id,
     });
 
     return {

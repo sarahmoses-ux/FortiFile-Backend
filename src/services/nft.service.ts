@@ -46,9 +46,15 @@ export class NftService {
       attributes: payload.attributes ?? []
     });
 
+    if (!metadataUpload?.uri) {
+      throw new ApiError(500, "Failed to upload document metadata");
+    }
+
+    const metadataUri = metadataUpload.uri;
+
     const mintedToken = await nftProvider.mintToken({
       to: user.walletAddress,
-      metadataUri: metadataUpload.uri,
+      metadataUri,
       documentId: payload.documentId,
       title: payload.title
     });
@@ -60,10 +66,10 @@ export class NftService {
       title: payload.title,
       description: payload.description,
       documentHash: payload.documentHash,
-      metadataUri: metadataUpload.uri,
-      tokenId: mintedToken.tokenId,
-      transactionHash: mintedToken.transactionHash,
-      contractAddress: mintedToken.contractAddress,
+      metadataUri,
+      tokenId: mintedToken?.tokenId,
+      transactionHash: mintedToken?.transactionHash,
+      contractAddress: mintedToken?.contractAddress,
       status: "minted",
       attributes: payload.attributes ?? []
     });
