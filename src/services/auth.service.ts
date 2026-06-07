@@ -10,6 +10,11 @@ interface SignupInput {
   password: string;
 }
 
+interface LoginInput {
+  email: string;
+  password: string;
+}
+
 export class AuthService {
   async signup(input: SignupInput) {
     const existingUser = await UserModel.findOne({ email: input.email.toLowerCase() });
@@ -26,7 +31,8 @@ export class AuthService {
     const user = await UserModel.create({
       email: input.email.toLowerCase(),
       fullname: input.fullname,
-      walletId: privy?.wallet.id,
+      password: hashedPassword,
+      privyUser: privy,
       walletAddress: privy?.wallet.address,
       userId: privy?.user.id,
     });
@@ -34,10 +40,36 @@ export class AuthService {
     return {
       id: user.id,
       email: user.email,
-      name: user.name,
+      name: user.fullname,
       walletAddress: user.walletAddress,
-      providerUserId: user.providerUserId,
-      provider: user.provider
+      privyUser: user.privyUser
+    };
+  }
+
+
+  async login(input: LoginInput) {
+    const existingUser = await UserModel.findOne({ email: input.email.toLowerCase() });
+
+    if (!existingUser) {
+      throw new ApiError(404, "User not found");
+    }
+
+    if (!existingUser.password) {
+      throw new ApiError(500, "User password is not set");
+    }
+
+    const isMatch = await bcrypt.compare(input.password, existingUser.password);
+
+    if (!isMatch) {
+      throw new ApiError(401, "Invalid credentials");
+    }
+
+    return {
+      id: existingUser.id,
+      email: existingUser.email,
+      name: existingUser.fullname,
+      walletAddress: existingUser.walletAddress,
+      privyUser: existingUser.privyUser
     };
   }
 }
