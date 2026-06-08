@@ -26,6 +26,10 @@ const userSchema = new Schema<User>(
       lowercase: true,
       trim: true
     },
+    password: {
+      type: String,
+      required: true
+    },
     privyUser: {
       type: Object,
       required: true,
