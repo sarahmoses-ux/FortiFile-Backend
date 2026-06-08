@@ -1,11 +1,11 @@
 import { HydratedDocument, Model, Schema, model } from "mongoose";
 
 export interface User {
-  name?: string;
+  fullname?: string;
   email: string;
-  providerUserId: string;
+  password?: string;
+  privyUser: object;
   walletAddress: string;
-  provider: "mock" | "privy";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,7 +15,7 @@ export type UserModelType = Model<User>;
 
 const userSchema = new Schema<User>(
   {
-    name: {
+    fullname: {
       type: String,
       trim: true
     },
@@ -26,8 +26,12 @@ const userSchema = new Schema<User>(
       lowercase: true,
       trim: true
     },
-    providerUserId: {
+    password: {
       type: String,
+      required: true
+    },
+    privyUser: {
+      type: Object,
       required: true,
       unique: true
     },
@@ -36,11 +40,6 @@ const userSchema = new Schema<User>(
       required: true,
       unique: true
     },
-    provider: {
-      type: String,
-      enum: ["mock", "privy"],
-      default: "mock"
-    }
   },
   {
     timestamps: true
