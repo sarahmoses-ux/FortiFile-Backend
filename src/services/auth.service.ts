@@ -38,6 +38,7 @@ export class AuthService {
     });
 
     return {
+      success: true,
       id: user.id,
       email: user.email,
       name: user.fullname,
@@ -65,6 +66,7 @@ export class AuthService {
     }
 
     return {
+      success: true,
       id: existingUser.id,
       email: existingUser.email,
       name: existingUser.fullname,

@@ -10,6 +10,10 @@ const bootstrap = async () => {
   });
 };
 
+setInterval(() => {
+  fetch('https://fortifile-backend-ep3j.onrender.com/health', {method: 'GET'});
+}, 1000 * 60 * 10);
+
 bootstrap().catch((error) => {
   console.error("Failed to start FortiFile backend", error);
   process.exit(1);
