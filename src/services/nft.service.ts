@@ -86,9 +86,9 @@ export class NftService {
   }
 
   async getWalletNfts(walletAddress: string) {
-    if (!isValidWalletAddress(walletAddress)) {
-      throw new ApiError(400, "Invalid wallet address");
-    }
+    // if (!isValidWalletAddress(walletAddress)) {
+    //   throw new ApiError(400, "Invalid wallet address");
+    // }
 
     const [walletTokens, persistedRecords] = await Promise.all([
       nftProvider.getTokensByWallet(walletAddress),
