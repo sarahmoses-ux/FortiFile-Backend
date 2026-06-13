@@ -8,32 +8,67 @@ import { isValidWalletAddress } from "../utils/address";
 import { metadataProvider, nftProvider } from "./providers";
 
 interface MintPayload {
-  documentId: string;
-  title: string;
+  documentId?: string;
+  title?: string;
   description?: string;
   documentHash?: string;
   attributes?: Array<{ trait_type: string; value: string }>;
+  docId?: string;
+  docName?: string;
+  institution?: string;
+  docType?: string;
+  fileCategory?: string;
+  thumbnail?: string;
+  thumbnailDataUri?: string;
+}
+
+interface UploadedFile {
+  buffer?: Buffer;
+  mimetype?: string;
+  originalname?: string;
 }
 
 interface MintDocumentInput {
   user: UserDocument;
   payload: MintPayload;
-  file?: Express.Multer.File;
+  file?: UploadedFile;
 }
+
+const detectDocumentType = (file?: UploadedFile) => {
+  const extension = (file?.originalname ?? "").toLowerCase().split(".").pop();
+  const mimeType = (file?.mimetype ?? "").toLowerCase();
+
+  if (mimeType.startsWith("image/") || ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "heic", "heif"].includes(extension ?? "")) {
+    return "image";
+  }
+
+  if (extension === "pdf" || mimeType === "application/pdf") {
+    return "pdf";
+  }
+
+  if (extension === "docx" || mimeType.includes("wordprocessingml") || mimeType.includes("officedocument")) {
+    return "docx";
+  }
+
+  return "other";
+};
 
 export class NftService {
   async mintDocument({ user, payload, file }: MintDocumentInput) {
+    const documentId = payload.documentId || payload.docId || `doc-${Date.now()}`;
+    const title = payload.title || payload.docName || "Untitled document";
+
     const documentHash =
       payload.documentHash || (file?.buffer ? crypto.createHash("sha256").update(file.buffer).digest("hex") : undefined);
 
     const duplicateQuery: FilterQuery<NftRecord> = documentHash
       ? {
           owner: user._id,
-          $or: [{ documentId: payload.documentId }, { documentHash }]
+          $or: [{ documentId }, { documentHash }]
         }
       : {
           owner: user._id,
-          documentId: payload.documentId
+          documentId
         };
 
     const duplicate = await NftRecordModel.findOne(duplicateQuery);
@@ -42,10 +77,12 @@ export class NftService {
       throw new ApiError(409, "This document already has an NFT for the authenticated user");
     }
 
+    const documentType = detectDocumentType(file);
+
     const metadataUpload = await metadataProvider.uploadDocumentMetadata({
       walletAddress: user.walletAddress,
-      documentId: payload.documentId,
-      title: payload.title,
+      documentId,
+      title,
       description: payload.description,
       documentHash,
       attributes: payload.attributes ?? [],
@@ -61,15 +98,16 @@ export class NftService {
     const mintedToken = await nftProvider.mintToken({
       to: user.walletAddress,
       metadataUri,
-      documentId: payload.documentId,
-      title: payload.title
+      documentId,
+      title
     });
 
     const record = await NftRecordModel.create({
       owner: user._id,
       walletAddress: user.walletAddress,
-      documentId: payload.documentId,
-      title: payload.title,
+      documentId,
+      documentType,
+      title,
       description: payload.description,
       documentHash,
       metadataUri,

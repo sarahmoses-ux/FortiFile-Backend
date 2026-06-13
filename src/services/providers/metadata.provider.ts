@@ -3,6 +3,13 @@ export interface MetadataAttribute {
   value: string;
 }
 
+interface UploadedFile {
+  buffer?: Buffer;
+  mimetype?: string;
+  originalname?: string;
+  size?: number;
+}
+
 export interface MetadataUploadInput {
   walletAddress: string;
   documentId: string;
@@ -10,7 +17,7 @@ export interface MetadataUploadInput {
   description?: string;
   documentHash?: string;
   attributes: MetadataAttribute[];
-  file?: Express.Multer.File;
+  file?: UploadedFile;
 }
 
 export interface MetadataUploadResult {
