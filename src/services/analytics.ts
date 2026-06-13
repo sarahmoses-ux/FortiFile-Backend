@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
 import { NftRecordModel } from "../models/nft-record.model";
+import { UserModel } from "../models/user.model";
 import { UserDocument } from "../models/user.model";
 
 export interface MintHistoryItem {
@@ -21,7 +22,7 @@ export interface DocumentTypeBreakdownItem {
 }
 
 export interface UserAnalyticsResponse {
-  owner: string;
+  ownerId: string;
   walletAddress: string;
   summary: {
     totalNftsMinted: number;
@@ -33,12 +34,17 @@ export interface UserAnalyticsResponse {
 }
 
 export class AnalyticsService {
-  async getUserAnalytics(user: UserDocument): Promise<UserAnalyticsResponse> {
-    const ownerId = user._id instanceof Types.ObjectId ? user._id : new Types.ObjectId(String(user._id));
+  async getUserAnalytics(wallet: string): Promise<UserAnalyticsResponse> {
+    const walletAddress = wallet;
+    const user = await UserModel.findOne({ walletAddress }).lean();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
 
     const [summary, mintHistory, documentTypeBreakdown] = await Promise.all([
       NftRecordModel.aggregate([
-        { $match: { owner: ownerId } },
+        { $match: { walletAddress } },
         {
           $group: {
             _id: null,
@@ -57,7 +63,7 @@ export class AnalyticsService {
         }
       ]),
       NftRecordModel.aggregate([
-        { $match: { owner: ownerId } },
+        { $match: { walletAddress } },
         { $sort: { createdAt: -1 } },
         {
           $project: {
@@ -74,7 +80,7 @@ export class AnalyticsService {
         { $limit: 10 }
       ]),
       NftRecordModel.aggregate([
-        { $match: { owner: ownerId } },
+        { $match: { walletAddress } },
         {
           $group: {
             _id: { $ifNull: ["$documentType", "other"] },
@@ -101,7 +107,7 @@ export class AnalyticsService {
     const totalDocumentTypes = documentTypeBreakdown.reduce((sum, item) => sum + item.count, 0);
 
     return {
-      owner: ownerId.toString(),
+      ownerId: user.privyUser.user.id,
       walletAddress: user.walletAddress,
       summary: {
         totalNftsMinted: summaryData.totalNftsMinted ?? 0,
