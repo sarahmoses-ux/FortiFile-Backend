@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { FilterQuery } from "mongoose";
 
 import { NftRecord, NftRecordModel } from "../models/nft-record.model";
@@ -17,14 +18,18 @@ interface MintPayload {
 interface MintDocumentInput {
   user: UserDocument;
   payload: MintPayload;
+  file?: Express.Multer.File;
 }
 
 export class NftService {
-  async mintDocument({ user, payload }: MintDocumentInput) {
-    const duplicateQuery: FilterQuery<NftRecord> = payload.documentHash
+  async mintDocument({ user, payload, file }: MintDocumentInput) {
+    const documentHash =
+      payload.documentHash || (file?.buffer ? crypto.createHash("sha256").update(file.buffer).digest("hex") : undefined);
+
+    const duplicateQuery: FilterQuery<NftRecord> = documentHash
       ? {
           owner: user._id,
-          $or: [{ documentId: payload.documentId }, { documentHash: payload.documentHash }]
+          $or: [{ documentId: payload.documentId }, { documentHash }]
         }
       : {
           owner: user._id,
@@ -42,8 +47,9 @@ export class NftService {
       documentId: payload.documentId,
       title: payload.title,
       description: payload.description,
-      documentHash: payload.documentHash,
-      attributes: payload.attributes ?? []
+      documentHash,
+      attributes: payload.attributes ?? [],
+      file
     });
 
     if (!metadataUpload?.uri) {
@@ -65,7 +71,7 @@ export class NftService {
       documentId: payload.documentId,
       title: payload.title,
       description: payload.description,
-      documentHash: payload.documentHash,
+      documentHash,
       metadataUri,
       tokenId: mintedToken?.tokenId,
       transactionHash: mintedToken?.transactionHash,
@@ -73,7 +79,6 @@ export class NftService {
       status: "minted",
       attributes: payload.attributes ?? []
     });
-
     return {
       id: record.id,
       documentId: record.documentId,
