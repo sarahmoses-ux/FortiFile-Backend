@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 
-import { getWalletNfts, mintNft } from "../controllers/nft.controller";
+import { getUserAnalytics, getWalletNfts, mintNft } from "../controllers/nft.controller";
 import { authenticateUser } from "../middleware/authenticate";
 import { mintRateLimiter } from "../middleware/rate-limit";
 import { validateBody } from "../middleware/validate";

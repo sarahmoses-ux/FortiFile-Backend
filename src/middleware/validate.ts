@@ -4,11 +4,12 @@ import { ZodSchema } from "zod";
 export const validateBody =
   <T>(schema: ZodSchema<T>) =>
   (req: Request, res: Response, next: NextFunction) => {
-    const result = schema.safeParse(req.body);
+    const body = typeof req.body === "object" && req.body !== null ? req.body : {};
+    const result = schema.safeParse(body);
 
     if (!result.success) {
       return res.status(400).json({
-        message: "Validation failed",
+        message: "Invalid upload metadata",
         details: result.error.flatten()
       });
     }

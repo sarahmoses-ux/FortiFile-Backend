@@ -4,8 +4,8 @@ declare global {
   namespace Express {
     interface Request {
       user?: UserDocument;
-      file?: Multer.File;
-      files?: Multer.File[];
+      file?: Express.Multer.File;
+      files?: Express.Multer.File[];
     }
   }
 }

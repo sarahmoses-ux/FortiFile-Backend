@@ -4,6 +4,7 @@ export interface NftRecord {
   owner: Types.ObjectId;
   walletAddress: string;
   documentId: string;
+  documentType: "image" | "pdf" | "docx" | "other";
   title: string;
   description?: string;
   documentHash?: string;
@@ -34,6 +35,12 @@ const nftRecordSchema = new Schema<NftRecord>(
     },
     documentId: {
       type: String,
+      required: true
+    },
+    documentType: {
+      type: String,
+      enum: ["image", "pdf", "docx", "other"],
+      default: "other",
       required: true
     },
     title: {
