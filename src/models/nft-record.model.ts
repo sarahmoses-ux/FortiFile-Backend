@@ -1,7 +1,7 @@
 import { HydratedDocument, Model, Schema, Types, model } from "mongoose";
 
 export interface NftRecord {
-  owner: Types.ObjectId;
+  ownerId: string;
   walletAddress: string;
   documentId: string;
   documentType: "image" | "pdf" | "docx" | "other";
@@ -23,8 +23,8 @@ export type NftRecordModelType = Model<NftRecord>;
 
 const nftRecordSchema = new Schema<NftRecord>(
   {
-    owner: {
-      type: Schema.Types.ObjectId,
+    ownerId: {
+      type: String,
       ref: "User",
       required: true
     },
@@ -88,9 +88,9 @@ const nftRecordSchema = new Schema<NftRecord>(
   }
 );
 
-nftRecordSchema.index({ owner: 1, documentId: 1 }, { unique: true });
+nftRecordSchema.index({ ownerId: 1, documentId: 1 }, { unique: true });
 nftRecordSchema.index(
-  { owner: 1, documentHash: 1 },
+  { ownerId: 1, documentHash: 1 },
   { unique: true, partialFilterExpression: { documentHash: { $type: "string" } } }
 );
 

@@ -63,11 +63,11 @@ export class NftService {
 
     const duplicateQuery: FilterQuery<NftRecord> = documentHash
       ? {
-          owner: user._id,
+          ownerId: user.privyUser.user.id,
           $or: [{ documentId }, { documentHash }]
         }
       : {
-          owner: user._id,
+          ownerId: user.privyUser.user.id,
           documentId
         };
 
@@ -103,7 +103,7 @@ export class NftService {
     });
 
     const record = await NftRecordModel.create({
-      owner: user._id,
+      ownerId: user.privyUser.user.id,
       walletAddress: user.walletAddress,
       documentId,
       documentType,
