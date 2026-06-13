@@ -10,6 +10,7 @@ export interface MetadataUploadInput {
   description?: string;
   documentHash?: string;
   attributes: MetadataAttribute[];
+  file?: Express.Multer.File;
 }
 
 export interface MetadataUploadResult {

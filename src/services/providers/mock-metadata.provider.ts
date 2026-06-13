@@ -4,7 +4,18 @@ import { MetadataProvider, MetadataUploadInput, MetadataUploadResult } from "./m
 
 export class MockMetadataProvider implements MetadataProvider {
   async uploadDocumentMetadata(input: MetadataUploadInput): Promise<MetadataUploadResult> {
-    const cid = crypto.createHash("sha256").update(JSON.stringify(input)).digest("hex").slice(0, 46);
+    const sanitizedInput = {
+      ...input,
+      file: input.file
+        ? {
+            originalname: input.file.originalname,
+            mimetype: input.file.mimetype,
+            size: input.file.size
+          }
+        : undefined
+    };
+
+    const cid = crypto.createHash("sha256").update(JSON.stringify(sanitizedInput)).digest("hex").slice(0, 46);
 
     return {
       cid,
