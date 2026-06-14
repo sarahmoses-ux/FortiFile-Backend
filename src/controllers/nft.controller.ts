@@ -61,7 +61,7 @@ export const mintNft = async (req: Request, res: Response) => {
 };
 
 export const getUserAnalytics = async (req: Request, res: Response) => {
-  const data = await analyticsService.getUserAnalytics(req.user!);
+  const data = await analyticsService.getUserAnalytics(req.params.address!);
 
   res.status(200).json({
     message: "User analytics fetched successfully",
