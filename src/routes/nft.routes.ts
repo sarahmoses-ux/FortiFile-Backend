@@ -21,3 +21,4 @@ nftRouter.post(
   asyncHandler(mintNft)
 );
 nftRouter.get("/wallet/:address", asyncHandler(getWalletNfts));
+nftRouter.get("/analytics/:address", asyncHandler(getUserAnalytics));
