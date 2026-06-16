@@ -67,7 +67,7 @@ export class NftService {
           $or: [{ documentId }, { documentHash }]
         }
       : {
-          ownerId: user.privyUser.user.id,
+          owner: user._id,
           documentId
         };
 

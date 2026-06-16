@@ -2,7 +2,6 @@ import { Types } from "mongoose";
 
 import { NftRecordModel } from "../models/nft-record.model";
 import { UserModel } from "../models/user.model";
-import { UserDocument } from "../models/user.model";
 
 export interface MintHistoryItem {
   _id: string;
@@ -22,7 +21,7 @@ export interface DocumentTypeBreakdownItem {
 }
 
 export interface UserAnalyticsResponse {
-  ownerId: string;
+  id: any;
   walletAddress: string;
   summary: {
     totalNftsMinted: number;
@@ -107,7 +106,7 @@ export class AnalyticsService {
     const totalDocumentTypes = documentTypeBreakdown.reduce((sum, item) => sum + item.count, 0);
 
     return {
-      ownerId: user.privyUser.user.id,
+      id: user._id,
       walletAddress: user.walletAddress,
       summary: {
         totalNftsMinted: summaryData.totalNftsMinted ?? 0,
